@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Generic ML Platform dashboard">
+  <title>Generic ML Platform</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="/static/overrides.css">
+</head>
+<body>
+  <div id="app-shell" class="app-shell">
+    <aside class="sidebar" aria-label="Primary navigation">
+      <div class="brand">
+        <span class="brand-mark">GD</span>
+        <span>Generic Object Detection</span>
+      </div>
+      <div class="sidebar-label">Workspace</div>
+      <nav class="nav-list">
+        <button class="nav-item is-active" data-view="dashboard"><span class="nav-icon">01</span>Dashboard</button>
+        <button class="nav-item" data-view="detect"><span class="nav-icon">02</span>Run Detection</button>
+        <button class="nav-item" data-view="files"><span class="nav-icon">03</span>File Repository</button>
+        <button class="nav-item" data-view="logs"><span class="nav-icon">04</span>System Logs</button>
+        <button class="nav-item" data-view="profile"><span class="nav-icon">05</span>My Profile</button>
+        <button class="nav-item admin-only is-hidden" data-view="admin"><span class="nav-icon">06</span>Admin</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="system-status"><span id="sidebar-status-dot" class="status-dot status-dot-online"></span><span id="sidebar-status">Online</span></div>
+        <button id="logout-button" class="text-button is-hidden">Log out</button>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <button id="menu-button" class="icon-button menu-button" aria-label="Open navigation">=</button>
+        <div class="breadcrumb"><span>Workspace</span><span class="breadcrumb-separator">/</span><strong id="page-label">Dashboard</strong></div>
+        <div class="topbar-actions">
+          <div class="status-indicator-badge"><span class="status-dot status-dot-online"></span><span>Online</span></div>
+          <div id="principal-badge" class="principal-badge is-hidden"><span>Principal:</span> <strong id="principal-username">username</strong></div>
+          <a class="docs-link" href="/docs" target="_blank" rel="noreferrer">API docs <span>↗</span></a>
+          <button id="auth-button" class="button button-dark">Sign in</button>
+          <button id="topbar-logout-button" class="button button-outline is-hidden">Logout</button>
+        </div>
+      </header>
+
+      <div id="toast-region" class="toast-region" aria-live="polite"></div>
+
+      <section id="view-dashboard" class="view is-visible">
+        <div class="hero-row">
+          <div>
+            <p class="eyebrow">MODEL OPERATIONS / OPERATIONAL MONITOR</p>
+            <h1>Generic Object Detection<br><em>Dashboard</em></h1>
+            <p class="hero-copy">Operational monitor for ML inference actions and system resources.</p>
+          </div>
+          <div class="hero-action"><button class="button button-accent" data-view-target="detect">+ Run New Detection</button></div>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card metric-primary">
+            <div class="metric-label">Total Inferences</div>
+            <div class="metric-value" id="dash-total-inferences">0</div>
+            <div class="metric-note">Calculated from actual database records</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">Avg Confidence</div>
+            <div class="metric-value metric-text" id="dash-avg-confidence">N/A</div>
+            <div class="metric-note">Confidence unavailable for current model</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">Storage Quota</div>
+            <div class="metric-value metric-text" id="dash-storage-quota">N/A</div>
+            <div class="metric-note">Storage tracking available in Phase 6</div>
+          </article>
+          <article class="metric-card">
+            <div class="metric-label">System Status</div>
+            <div class="metric-value metric-text"><span class="status-dot status-dot-online"></span> Online</div>
+            <div class="metric-note">Application & session active</div>
+          </article>
+        </div>
+
+        <div class="content-grid dashboard-grid">
+          <article class="panel table-panel">
+            <div class="panel-heading" style="padding:20px 20px 0;">
+              <div>
+                <p class="eyebrow">INFERENCE HISTORY</p>
+                <h2>Recent Predictions</h2>
+              </div>
+            </div>
+            <div id="recent-preds-loading" class="empty-state is-hidden"><h3>Loading predictions...</h3></div>
+            <div id="recent-preds-empty" class="empty-state">
+              <div class="empty-mark">+</div>
+              <h3>No predictions yet</h3>
+              <p>Run your first inference to see results here.</p>
+            </div>
+            <div class="table-scroll">
+              <table id="recent-preds-table" class="is-hidden">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Output / Class</th>
+                    <th>Confidence</th>
+                    <th>Input Type</th>
+                    <th>Timestamp</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody id="recent-preds-body"></tbody>
+              </table>
+            </div>
+          </article>
+
+          <div class="dashboard-side-column" style="display:grid; gap:18px;">
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">DISTRIBUTION</p>
+                  <h2>Classification Summary</h2>
+                </div>
+              </div>
+              <div id="class-summary-empty" class="empty-state" style="min-height:120px;">
+                <p>No classification data available.</p>
+              </div>
+              <div id="class-summary-list" class="mini-list is-hidden"></div>
+            </article>
+
+            <article class="panel">
+              <div class="panel-heading">
+                <div>
+                  <p class="eyebrow">AUDIT FEED</p>
+                  <h2>Audit Timeline</h2>
+                </div>
+              </div>
+              <div id="audit-timeline-empty" class="empty-state" style="min-height:120px;">
+                <p>No recent activity.</p>
+              </div>
+              <div id="audit-timeline-list" class="audit-timeline-feed is-hidden"></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-detect" class="view">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">MODEL OPERATIONS / INFERENCE PIPELINE</p>
+            <h1>Generic Object Detection</h1>
+            <p class="section-copy">Input type required: Image (PNG, JPG, JPEG, WEBP)</p>
+          </div>
+        </div>
+
+        <div class="content-grid prediction-grid">
+          <article class="panel form-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">INPUT IMAGE</p>
+                <h2>Upload Image</h2>
+              </div>
+              <span class="panel-number">02</span>
+            </div>
+
+            <div id="image-dropzone" class="dropzone-area">
+              <input type="file" id="image-file-input" accept=".png,.jpg,.jpeg,.webp" class="is-hidden" />
+              <div class="dropzone-prompt">
+                <div class="empty-mark" style="font-size:32px;">📷</div>
+                <h3>Drag & drop your image here</h3>
+                <p class="section-copy">or <button type="button" id="browse-files-btn" class="text-link-btn">Browse Files</button></p>
+                <p class="field-help" style="margin-top:10px;">Supported formats: PNG, JPG, JPEG, WEBP (Max 10MB)</p>
+              </div>
+            </div>
+
+            <div id="image-preview-card" class="preview-card is-hidden" style="margin-top:16px;">
+              <div style="display:flex; align-items:center; gap:16px;">
+                <img id="image-preview-img" src="" alt="Selected preview" style="width:72px; height:72px; object-fit:cover; border-radius:8px; border:1px solid var(--border);" />
+                <div style="flex:1; overflow:hidden;">
+                  <h4 id="image-preview-name" style="font-size:14px; margin-bottom:4px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">image.jpg</h4>
+                  <p id="image-preview-size" class="section-copy" style="font-size:12px;">0 KB</p>
+                </div>
+                <button id="clear-image-btn" class="button button-outline button-sm">Change</button>
+              </div>
+            </div>
+
+            <p id="detect-error" class="field-error is-hidden" style="margin-top:16px;"></p>
+
+            <button id="run-detect-btn" class="button button-accent button-wide" style="margin-top:20px;" disabled>
+              RUN INFERENCE PIPELINE <span>→</span>
+            </button>
+            <p class="form-footnote" style="margin-top:12px;">Runs real SSDLite MobileNet object detection inference on the server.</p>
+          </article>
+
+          <article id="detect-result-panel" class="panel result-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">INFERENCE RESULT</p>
+                <h2 id="detect-result-title">Detection Result</h2>
+              </div>
+              <span id="detect-state" class="state-chip">Waiting</span>
+            </div>
+
+            <div id="detect-empty" class="empty-state">
+              <div class="empty-mark">+</div>
+              <h3>No detection result yet</h3>
+              <p>Upload an image and click <strong>RUN INFERENCE PIPELINE</strong> to see detected objects and bounding boxes here.</p>
+            </div>
+
+            <div id="detect-result-content" class="is-hidden" style="display:grid; gap:20px;">
+              <div class="result-meta">
+                <div><span>Model</span><strong id="detect-model-name">ssdlite320_mobilenet_v3_large</strong></div>
+                <div><span>Objects Detected</span><strong id="detect-count-text">0</strong></div>
+              </div>
+
+              <div class="image-comparison-grid" style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
+                <div>
+                  <label class="field-label" style="margin-bottom:6px; display:block;">Original Image</label>
+                  <img id="detect-orig-img" src="" alt="Original Image" style="width:100%; border-radius:8px; border:1px solid var(--border);" />
+                </div>
+                <div>
+                  <label class="field-label" style="margin-bottom:6px; display:block;">Annotated Bounding Boxes</label>
+                  <img id="detect-annotated-img" src="" alt="Annotated Image" style="width:100%; border-radius:8px; border:1px solid var(--border);" />
+                </div>
+              </div>
+
+              <div>
+                <h3 style="font-size:15px; margin-bottom:10px;">Detections Breakdown</h3>
+                <div id="detect-zero-state" class="empty-state is-hidden" style="min-height:80px; padding:16px;">
+                  <p>No objects detected above confidence threshold (0.30).</p>
+                </div>
+                <div class="table-scroll">
+                  <table id="detections-table" class="is-hidden">
+                    <thead>
+                      <tr>
+                        <th>Class</th>
+                        <th>Confidence</th>
+                        <th>Bounding Box (x1, y1, x2, y2)</th>
+                      </tr>
+                    </thead>
+                    <tbody id="detections-body"></tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="result-meta" style="margin-top:10px;">
+                <div><span>Prediction ID</span><strong id="detect-pred-id">#0</strong></div>
+                <div><span>Timestamp</span><strong id="detect-timestamp">N/A</strong></div>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="view-files" class="view">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">WORKSPACE / STORAGE</p>
+            <h1>File Repository</h1>
+            <p class="section-copy">Authenticated repository for user uploaded & generated files.</p>
+          </div>
+          <button id="refresh-files-btn" class="button button-outline">Refresh files <span>↻</span></button>
+        </div>
+
+        <article class="panel table-panel">
+          <div id="files-loading" class="empty-state is-hidden">
+            <h3>Loading repository files...</h3>
+          </div>
+          <div id="files-empty" class="empty-state">
+            <div class="empty-mark">📁</div>
+            <h3>No files stored</h3>
+            <p>Uploaded images and generated predictions will appear here.</p>
+          </div>
+          <div class="table-scroll">
+            <table id="files-table" class="is-hidden">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>File Name</th>
+                  <th>Category</th>
+                  <th>Type</th>
+                  <th>Size</th>
+                  <th>Upload Date</th>
+                  <th>Prediction</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="files-body"></tbody>
+            </table>
+          </div>
+        </article>
+      </section>
+
+      <section id="view-logs" class="view">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">CONTROL PLANE / AUDIT</p>
+            <h1>System Logs</h1>
+            <p class="section-copy">Audit log monitoring for application and user activities.</p>
+          </div>
+          <button id="refresh-logs-btn" class="button button-outline">Refresh logs <span>↻</span></button>
+        </div>
+
+        <article class="panel table-panel">
+          <div class="panel-heading" style="padding:16px 20px; border-bottom:1px solid #2d323e; display:flex; flex-wrap:wrap; gap:12px; align-items:center; justify-content:space-between;">
+            <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+              <select id="logs-filter-action" class="text-input" style="padding:6px 10px; font-size:13px; width:auto; background:#1f232d; color:#f3f4f6; border:1px solid #374151;">
+                <option value="">All Actions</option>
+                <option value="Login Success">Login Success</option>
+                <option value="Login Failed">Login Failed</option>
+                <option value="Register">Register</option>
+                <option value="Logout">Logout</option>
+                <option value="Predict">Predict</option>
+              </select>
+
+              <input type="text" id="logs-filter-username" class="text-input admin-only is-hidden" placeholder="Filter by user" style="padding:6px 10px; font-size:13px; width:150px; background:#1f232d; color:#f3f4f6; border:1px solid #374151;" />
+
+              <input type="date" id="logs-filter-start" class="text-input" style="padding:6px 10px; font-size:13px; width:140px; background:#1f232d; color:#f3f4f6; border:1px solid #374151;" title="Start date" />
+              <input type="date" id="logs-filter-end" class="text-input" style="padding:6px 10px; font-size:13px; width:140px; background:#1f232d; color:#f3f4f6; border:1px solid #374151;" title="End date" />
+
+              <button id="logs-apply-filters" class="button button-accent button-sm">Filter</button>
+              <button id="logs-reset-filters" class="button button-outline button-sm">Reset</button>
+            </div>
+            <div style="font-size:12px; color:var(--muted);" id="logs-total-count">0 log entries</div>
+          </div>
+
+          <div id="logs-loading" class="empty-state is-hidden">
+            <h3>Loading system logs...</h3>
+          </div>
+          <div id="logs-empty" class="empty-state">
+            <div class="empty-mark">📋</div>
+            <h3>No audit activity found.</h3>
+            <p>System audit events will appear here.</p>
+          </div>
+          <div class="table-scroll">
+            <table id="logs-table" class="is-hidden">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Timestamp</th>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>IP Address</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody id="logs-body"></tbody>
+            </table>
+          </div>
+
+          <div id="logs-pagination" class="panel-footer is-hidden" style="padding:14px 20px; display:flex; justify-content:space-between; align-items:center; border-top:1px solid #2d323e;">
+            <div style="font-size:13px; color:var(--muted);" id="logs-page-info">Page 1 of 1</div>
+            <div style="display:flex; gap:8px;">
+              <button id="logs-prev-page" class="button button-outline button-sm" disabled>← Previous</button>
+              <button id="logs-next-page" class="button button-outline button-sm" disabled>Next →</button>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section id="view-predict" class="view">
+        <div class="section-heading"><div><p class="eyebrow">MODEL OPERATIONS / INFERENCE</p><h1>Prediction studio</h1><p class="section-copy">Submit one row of tabular features to the existing <code>POST /ml/predict</code> endpoint.</p></div></div>
+        <div class="content-grid prediction-grid"><article class="panel form-panel"><div class="panel-heading"><div><p class="eyebrow">INPUT PAYLOAD</p><h2>Feature values</h2></div><span class="panel-number">02</span></div><p class="field-help">The current backend accepts a generic JSON object because feature metadata is application-specific.</p><label class="field-label" for="features-input">Features JSON</label><textarea id="features-input" class="code-input" spellcheck="false">{
+  "feature": 0
+}</textarea><p id="features-error" class="field-error is-hidden"></p><button id="predict-button" class="button button-accent button-wide">Run prediction <span>→</span></button><p class="form-footnote">The configured fitted preprocessor is used by the backend when present.</p></article><article class="panel result-panel"><div class="panel-heading"><div><p class="eyebrow">OUTPUT</p><h2>Prediction result</h2></div><span id="result-state" class="state-chip">Waiting</span></div><div id="prediction-empty" class="empty-state"><div class="empty-mark">+</div><h3>No prediction yet</h3><p>Submit a valid feature object to see the model output here.</p></div><div id="prediction-result" class="is-hidden"><div class="result-label">Prediction</div><div id="prediction-value" class="result-value"></div><div id="probability-block" class="probability-block is-hidden"><div class="result-label">Probability</div><div id="probability-value" class="probability-value"></div></div><div class="result-meta"><div><span>Model</span><strong id="result-model">Configured artifact</strong></div><div><span>Persistence</span><strong>Recorded by backend</strong></div></div></div></article></div>
+      </section>
+
+      <section id="view-history" class="view"><div class="section-heading"><div><p class="eyebrow">MODEL OPERATIONS / AUDIT</p><h1>Prediction history</h1><p class="section-copy">A clear record requires a backend history read endpoint.</p></div></div><article class="panel unavailable-panel"><div class="empty-mark">--</div><h2>History is not exposed yet</h2><p>The backend persists prediction records but does not currently provide a read endpoint. No sample or fake history is shown.</p><a href="/docs" target="_blank" rel="noreferrer" class="button button-outline">Review API surface <span>↗</span></a></article></section>
+
+      <section id="view-profile" class="view">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">WORKSPACE / IDENTITY</p>
+            <h1>My Profile & Account</h1>
+            <p class="section-copy">View identity details, update profile information, and manage security credentials.</p>
+          </div>
+        </div>
+
+        <article id="profile-panel" class="panel profile-panel">
+          <div class="empty-state">
+            <div class="empty-mark">?</div>
+            <h3>No authenticated user</h3>
+            <p>Sign in to display the user information available from the backend.</p>
+            <button class="button button-dark" data-auth-action="login">Sign in</button>
+          </div>
+        </article>
+      </section>
+
+      <section id="view-admin" class="view"><div class="section-heading"><div><p class="eyebrow">CONTROL PLANE / ACCESS</p><h1>Admin users</h1><p class="section-copy">Manage users through the existing admin-only API routes.</p></div><button id="refresh-users" class="button button-outline">Refresh users <span>↻</span></button></div><article class="panel table-panel"><div id="users-loading" class="empty-state is-hidden"><h3>Loading users...</h3></div><div id="users-empty" class="empty-state is-hidden"><h3>No users returned</h3><p>The admin API returned an empty collection.</p></div><div class="table-scroll"><table id="users-table"><thead><tr><th>ID</th><th>User</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead><tbody id="users-body"></tbody></table></div></article></section>
+    </main>
+  </div>
+
+  <div id="auth-modal" class="modal-backdrop is-hidden" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <div class="modal auth-card">
+      <button id="close-modal" class="modal-close" aria-label="Close dialog">×</button>
+      <div class="auth-header">
+        <div class="auth-brand">
+          <span class="auth-logo-badge">GD</span>
+          <span class="auth-brand-text">Generic Object Detection</span>
+        </div>
+      </div>
+      <div class="modal-tabs">
+        <button id="login-tab" class="modal-tab is-active">Sign in</button>
+        <button id="register-tab" class="modal-tab">Create account</button>
+      </div>
+      <h2 id="auth-title">Welcome back</h2>
+      <p id="auth-subtitle" class="section-copy">Sign in with your existing account.</p>
+      <form id="auth-form">
+        <div id="username-field" class="field-group is-hidden">
+          <label class="field-label" for="auth-username">Username</label>
+          <input id="auth-username" class="text-input" placeholder="Enter username" autocomplete="username">
+        </div>
+        <div class="field-group">
+          <label id="auth-email-label" class="field-label" for="auth-email">Username or Email</label>
+          <input id="auth-email" class="text-input" placeholder="Enter email or username" autocomplete="email" required>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="auth-password">Password</label>
+          <input id="auth-password" class="text-input" type="password" placeholder="••••••••" autocomplete="current-password" required>
+        </div>
+        <div id="confirm-password-field" class="field-group is-hidden">
+          <label class="field-label" for="auth-confirm-password">Confirm Password</label>
+          <input id="auth-confirm-password" class="text-input" type="password" placeholder="••••••••" autocomplete="new-password">
+        </div>
+        <p id="auth-error" class="field-error is-hidden"></p>
+        <button id="auth-submit" class="button button-accent button-wide" type="submit">Sign in</button>
+      </form>
+      <div class="auth-toggle-box">
+        <span id="auth-toggle-text">Don't have an account?</span>
+        <button id="auth-toggle-btn" class="text-link-btn" type="button">Create Account</button>
+      </div>
+    </div>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

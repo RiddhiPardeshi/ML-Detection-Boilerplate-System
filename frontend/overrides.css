@@ -1,0 +1,349 @@
+.toast-region {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 35;
+  display: grid;
+  gap: 10px;
+  width: min(360px, calc(100vw - 36px));
+}
+
+.toast {
+  background: #171a21;
+  color: #f3f4f6;
+  border-left: 4px solid #f59e0b;
+  border-radius: 7px;
+  padding: 13px 15px;
+  font-size: 13px;
+  box-shadow: 0 14px 35px rgba(0, 0, 0, 0.4);
+  animation: toast-in 0.2s ease both;
+}
+
+.toast-error {
+  border-left-color: #ef4444;
+}
+
+.toast-success {
+  border-left-color: #10b981;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #f59e0b;
+  color: #111827;
+  font-weight: 800;
+  font-size: 22px;
+}
+
+/* Navigation & Status Badges */
+.status-indicator-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  color: #10b981;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.principal-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #9ca3af;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+.principal-badge strong {
+  color: #f59e0b;
+  font-weight: 700;
+}
+
+.nav-item.is-active {
+  box-shadow: inset 3px 0 #f59e0b;
+  color: #ffffff;
+}
+
+.nav-item.is-active .nav-icon {
+  color: #f59e0b;
+}
+
+/* Run Detection Dropzone & Cards */
+.dropzone-area {
+  border: 2px dashed #374151;
+  background: rgba(31, 35, 45, 0.5);
+  border-radius: 12px;
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.dropzone-area:hover,
+.dropzone-area.drag-over {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.preview-card {
+  background: #1f232d;
+  border: 1px solid #374151;
+  border-radius: 10px;
+  padding: 14px;
+}
+
+/* Dashboard Side Feed & Audit Timeline */
+.audit-timeline-feed {
+  display: grid;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.audit-item-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 10px;
+}
+
+.audit-item-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.audit-action-title {
+  color: #f59e0b;
+  font-weight: 700;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.audit-meta-text {
+  color: #9ca3af;
+  font-size: 11px;
+}
+
+.audit-desc-text {
+  color: #d1d5db;
+  margin-top: 2px;
+  word-break: break-word;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.summary-row:last-child {
+  border-bottom: none;
+}
+
+.summary-count-chip {
+  background: #f59e0b;
+  color: #111827;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 11px;
+}
+
+/* Dark Enterprise Auth Styling */
+.modal-backdrop {
+  background: rgba(11, 13, 17, 0.88);
+  backdrop-filter: blur(8px);
+}
+
+.modal.auth-card {
+  background: #161920;
+  border: 1px solid #2d323e;
+  color: #f3f4f6;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  max-width: 440px;
+  width: 100%;
+}
+
+.auth-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.auth-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-logo-badge {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  background: #f59e0b;
+  color: #111827;
+  font-size: 12px;
+  font-weight: 800;
+  border-radius: 8px;
+}
+
+.auth-brand-text {
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+  color: #f3f4f6;
+}
+
+.modal-tabs {
+  border-bottom: 1px solid #2d323e;
+  margin-bottom: 22px;
+}
+
+.modal-tab {
+  color: #9ca3af;
+  font-size: 14px;
+  padding-bottom: 10px;
+}
+
+.modal-tab.is-active {
+  color: #f59e0b;
+  border-bottom-color: #f59e0b;
+}
+
+.auth-card h2 {
+  color: #f3f4f6;
+  font-size: 22px;
+  margin-bottom: 6px;
+}
+
+.auth-card .section-copy {
+  color: #9ca3af;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.auth-card .field-label {
+  color: #d1d5db;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.auth-card .text-input {
+  background: #1f232d;
+  border: 1px solid #374151;
+  color: #f3f4f6;
+  border-radius: 8px;
+  padding: 11px 13px;
+  font-size: 14px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.auth-card .text-input:focus {
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.button-accent {
+  background: #f59e0b;
+  color: #111827;
+  border-radius: 8px;
+  font-weight: 700;
+}
+
+.button-accent:hover {
+  background: #d97706;
+  color: #ffffff;
+}
+
+.auth-toggle-box {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #2d323e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+.text-link-btn {
+  background: transparent;
+  border: none;
+  color: #f59e0b;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.text-link-btn:hover {
+  color: #fbbf24;
+}
+
+.field-error {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.1);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+@media (max-width: 760px) {
+  .toast-region {
+    right: 18px;
+    bottom: 18px;
+  }
+  .modal.auth-card {
+    padding: 24px 18px;
+  }
+  .principal-badge {
+    display: none;
+  }
+  .image-comparison-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.button-danger {
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #ef4444;
+}
+
+.button-danger:hover {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: #ef4444;
+  color: #f87171;
+}
+

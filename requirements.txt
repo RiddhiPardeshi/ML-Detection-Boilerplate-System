@@ -1,0 +1,14 @@
+fastapi
+python-multipart
+sqlalchemy
+psycopg2-binary
+pwdlib[argon2]
+pandas
+scikit-learn
+joblib
+torch
+torchvision
+pillow
+pytest
+httpx2
+uvicorn
