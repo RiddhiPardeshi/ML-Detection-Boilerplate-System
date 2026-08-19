@@ -4,13 +4,7 @@ import uuid
 from pathlib import Path
 from typing import Any, Dict, List
 
-import torch
-import torchvision
 from PIL import Image, ImageDraw
-from torchvision.models.detection import (
-    SSDLite320_MobileNet_V3_Large_Weights,
-    ssdlite320_mobilenet_v3_large,
-)
 
 _MODEL_INSTANCE = None
 _WEIGHTS_INSTANCE = None
@@ -20,6 +14,13 @@ _CATEGORIES = None
 def get_detection_model():
     global _MODEL_INSTANCE, _WEIGHTS_INSTANCE, _CATEGORIES
     if _MODEL_INSTANCE is None:
+        import torch
+        import torchvision
+        from torchvision.models.detection import (
+            SSDLite320_MobileNet_V3_Large_Weights,
+            ssdlite320_mobilenet_v3_large,
+        )
+
         _WEIGHTS_INSTANCE = SSDLite320_MobileNet_V3_Large_Weights.DEFAULT
         _MODEL_INSTANCE = ssdlite320_mobilenet_v3_large(weights=_WEIGHTS_INSTANCE)
         _MODEL_INSTANCE.eval()
@@ -39,6 +40,8 @@ def run_object_detection(
         raise ValueError(f"Invalid or unreadable image file: {e}")
 
     orig_width, orig_height = image.size
+
+    import torch
 
     model, weights, categories = get_detection_model()
     transforms = weights.transforms()
